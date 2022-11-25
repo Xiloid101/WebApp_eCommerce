@@ -10,17 +10,18 @@ def basket_summary(request):
 
 def basket_add(request):
 # getting information from AJAX script in single.html
-#  matches action and productid from there too
+# matching action and productid from there too
     basket = Basket(request)
     if request.POST.get('action') == 'post':
         product_id = int(request.POST.get('productid'))
+        product_qty = int(request.POST.get('productqty'))
         product = get_object_or_404(Product, id=product_id)
             # compact alternative to the following code:
             # try:
             #     product = Product.objects.get(id=product_id)
             # except:
             #     raise Http404
-        basket.add(product=product)
+        basket.add(product=product, qty=product_qty)
         response = JsonResponse({'test':'data'})
         return response
 
