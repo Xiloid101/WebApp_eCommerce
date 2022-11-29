@@ -36,7 +36,7 @@
                   <option value="">3</option>
                   <option value="">4</option>
                 </select>
-                <button type="button" id="update-button" data-index="{{product.id}}"
+                <button type="button" id="add-button" value="{{product.id}}"
                   class="btn btn-outline-secondary btn-sm update-button">
                   Update
                 </button>
@@ -57,5 +57,25 @@
     </div>
   </div>
 </main>
+
+<script>
+    $(document).on('click', '.delete-button', function (e) {
+        e.preventDefault();
+        var prodid = $(this).data('index');
+        $.ajax({
+            type: 'POST',
+            url: '{% url "basket:basket_delete" %}',
+            data: {
+                productid: $(this).data('index'),
+                csrfmiddlewaretoken: "{{csrf_token}}",
+                action: 'post'
+                },
+            success: function (json) {
+              $('.product-item[data-index="'+ prodid +'"]').remove();
+            },
+            error: function (xhr, errmsg, err) {}
+        });
+    })
+</script>
 
 {% endblock %}
