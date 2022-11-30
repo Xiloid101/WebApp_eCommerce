@@ -15,10 +15,11 @@ class Basket():
 
     def add(self, product, qty):
         """Adding and updating the users basket session data"""
-        product_id = product.id
+        product_id = str(product.id)
         if product_id not in self.basket:
-            self.basket[product_id] = {'price': str(product.price), 'qty':int(qty)}
-
+            self.basket[product_id] = {'price': str(product.price), 'qty': qty}
+        else:
+            self.basket[product_id]['qty'] += qty
         self.save()
 
     def __iter__(self):
@@ -43,7 +44,6 @@ class Basket():
         total_price = sum([ Decimal(item['price']) * item['qty'] for item in self.basket.values() ])
         return total_price
 
-
     def delete(self, product):
         """Delete item from session data"""
         product_id = str(product)
@@ -54,3 +54,9 @@ class Basket():
 
     def save(self):
         self.session.modified = True
+
+    def update(self, product, qty):
+        """Changing and updating the users basket session data"""
+        product_id = str(product)
+        self.basket[product_id]['qty'] = qty
+        self.save()
