@@ -3,16 +3,24 @@ from django.http import HttpResponse
 from .forms import RegistrationForm
 from .token import account_activation_token
 from django.template.loader import render_to_string
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
 
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 
+from .models import UserBase
+
+
+@login_required
+def dashboard(request):
+    return render(request, 'account/user/dashboard.html')
 
 def account_register(request):
 
-#    if request.user.is_authenticated:
-#        return redirect('/')
+#   if request.user.is_authenticated:
+#       return redirect('/')
 
     if request.method == 'POST':
         registerForm = RegistrationForm(request.POST)
@@ -32,10 +40,22 @@ def account_register(request):
                 'token': account_activation_token.make_token(user),
             })
             user.email_user(subject=subject, message=message)
+            return HttpResponse('registered successfully and activation sent')
     else:
         registerForm = RegistrationForm()
 
     return render(request, 'account/registration/register.html', {'form': registerForm})
 
-
-    def account_activate(request):
+def account_activate(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = UserBase.objects.get(pk=uid)
+    except():
+        pass
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        login(request, user)
+        return redirect('account:dashboard')
+    else:
+        return render(request, 'account/registration/activation_invalid.html')
